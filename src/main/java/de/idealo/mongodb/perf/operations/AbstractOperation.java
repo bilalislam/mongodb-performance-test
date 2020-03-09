@@ -1,10 +1,13 @@
 package de.idealo.mongodb.perf.operations;
 
-import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
 import de.idealo.mongodb.perf.MongoDbAccessor;
 import org.bson.Document;
+import org.bson.UuidRepresentation;
+import org.bson.codecs.UuidCodec;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -31,7 +34,7 @@ public abstract class AbstractOperation implements IOperation{
 
         final IndexOptions options = new IndexOptions();
         options.background(false);
-        mongoCollection.createIndex(new BasicDBObject(queriedField, 1), options);
+        //mongoCollection.createIndex(new BasicDBObject(queriedField, 1), options);
         minId = getMinMax(mongoDbAccessor, queriedField, true);
         maxId = getMinMax(mongoDbAccessor, queriedField, false);
 
