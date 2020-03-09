@@ -5,12 +5,17 @@ import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.bson.UuidRepresentation;
+import org.bson.codecs.UuidCodec;
+import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
+
+import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
 
 /**
  * Created by kay.agahd on 23.11.16.
@@ -28,21 +33,22 @@ public class MongoDbAccessor {
     private MongoClient mongo;
 
 
-
-    private MongoDbAccessor(){
+    private MongoDbAccessor() {
         this(-1, null, null, null, false, null);
-    };
+    }
 
-    public MongoDbAccessor(String user, String pw, String authDb, boolean ssl, ServerAddress ... serverAddress){
+    ;
+
+    public MongoDbAccessor(String user, String pw, String authDb, boolean ssl, ServerAddress... serverAddress) {
         this(-1, user, pw, authDb, ssl, serverAddress);
     }
 
-    public MongoDbAccessor(int socketTimeOut, String user, String pw, String authDb, boolean ssl, ServerAddress ... serverAddress){
+    public MongoDbAccessor(int socketTimeOut, String user, String pw, String authDb, boolean ssl, ServerAddress... serverAddress) {
         this.serverAddress = serverAddress;
         this.socketTimeOut = socketTimeOut;
         this.user = user;
         this.pw = pw;
-        this.authDb = authDb!=null&&!authDb.isEmpty()?authDb:"admin";
+        this.authDb = authDb != null && !authDb.isEmpty() ? authDb : "admin";
         this.ssl = ssl;
         init();
     }
@@ -56,27 +62,28 @@ public class MongoDbAccessor {
         LOG.info(">>> init {}", serverAddress);
         try {
             MongoClientOptions options = MongoClientOptions.builder().
-                    connectTimeout(1000*2).//fail fast, so we know this node is unavailable
-                    socketTimeout(socketTimeOut==-1?1000*10:socketTimeOut).//default 10 seconds
+                    connectTimeout(1000 * 2).//fail fast, so we know this node is unavailable
+                    socketTimeout(socketTimeOut == -1 ? 1000 * 10 : socketTimeOut).//default 10 seconds
                     readPreference(ReadPreference.secondaryPreferred()).
                     connectionsPerHost(5000).
                     threadsAllowedToBlockForConnectionMultiplier(10).
                     writeConcern(WriteConcern.ACKNOWLEDGED).
                     sslEnabled(ssl).
                     sslInvalidHostNameAllowed(true).
+                    codecRegistry(CodecRegistries.fromRegistries(fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)), MongoClient.getDefaultCodecRegistry())).
                     build();
 
-            if(user != null && !user.isEmpty() && pw!= null && !pw.isEmpty()) {
+            if (user != null && !user.isEmpty() && pw != null && !pw.isEmpty()) {
                 MongoCredential mc = MongoCredential.createCredential(user, authDb, pw.toCharArray());
-                if(serverAddress.length == 1) {
+                if (serverAddress.length == 1) {
                     mongo = new MongoClient(serverAddress[0], Lists.newArrayList(mc), options);
-                }else {
+                } else {
                     mongo = new MongoClient(Lists.newArrayList(serverAddress), Lists.newArrayList(mc), options);
                 }
-            }else{
-                if(serverAddress.length == 1) {
+            } else {
+                if (serverAddress.length == 1) {
                     mongo = new MongoClient(serverAddress[0], options);
-                }else {
+                } else {
                     mongo = new MongoClient(Lists.newArrayList(serverAddress), options);
                 }
             }
@@ -91,18 +98,18 @@ public class MongoDbAccessor {
     }
 
     public Long getLong(Document dbObj, String name) {
-        if(dbObj != null) {
+        if (dbObj != null) {
             Object obj = dbObj.get(name);
-            if(obj != null && obj instanceof Long) {
-                return (Long)(obj);
+            if (obj != null && obj instanceof Long) {
+                return (Long) (obj);
             }
         }
         return null;
     }
 
-    public Document getMinMax(MongoCollection<Document> mongoCollection, String field, boolean min){
+    public Document getMinMax(MongoCollection<Document> mongoCollection, String field, boolean min) {
         try {
-            final int sort = min?1:-1;
+            final int sort = min ? 1 : -1;
             return mongoCollection.find().sort(new BasicDBObject(field, sort)).projection(new BasicDBObject(field, 1)).first();
         } catch (Exception e) {
             LOG.error("error while getting field '{}' from mongodb", field, e);
@@ -113,7 +120,7 @@ public class MongoDbAccessor {
 
     public Document runCommand(String dbName, DBObject cmd) throws IllegalStateException {
         checkMongo();
-        if(dbName != null && !dbName.isEmpty()) {
+        if (dbName != null && !dbName.isEmpty()) {
             return getMongoDatabase(dbName).runCommand((Bson) cmd, ReadPreference.secondaryPreferred());
         }
         throw new IllegalStateException("Database not initialized");
@@ -121,7 +128,7 @@ public class MongoDbAccessor {
 
 
     private void checkMongo() {
-        if(mongo == null /*|| !mongo.getConnector().isOpen()*/) {
+        if (mongo == null /*|| !mongo.getConnector().isOpen()*/) {
             init();
         }
     }
@@ -131,7 +138,7 @@ public class MongoDbAccessor {
         LOG.info(">>> closeConnections {}", serverAddress);
 
         try {
-            if(mongo != null) {
+            if (mongo != null) {
                 mongo.close();
                 mongo = null;
             }
@@ -148,7 +155,7 @@ public class MongoDbAccessor {
         MongoDbAccessor monitor = new MongoDbAccessor(null, null, null, false, adr);
         Document doc = monitor.runCommand("admin", new BasicDBObject("isMaster", "1"));
         LOG.info("doc: {}", doc);
-        LOG.info("ismaster: {}",  doc.get("ismaster"));
+        LOG.info("ismaster: {}", doc.get("ismaster"));
         monitor.closeConnections();
 
     }
