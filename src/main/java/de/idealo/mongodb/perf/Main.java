@@ -40,17 +40,17 @@ public class Main {
     private final String version;
     private int randomFieldLength = 0;
 
-    public Main(){
+    public Main() {
         version = getClass().getPackage().getImplementationVersion();
     }
 
-    private void validateInput(String... args){
+    private void validateInput(String... args) {
         boolean helpRequested = false;
         boolean exception = false;
         Options cliOptions = cliOptions();
         try {
             CommandLine cmdLine = new DefaultParser().parse(cliOptions, args);
-            if(cmdLine.hasOption("v")){
+            if (cmdLine.hasOption("v")) {
                 System.out.print("version " + version);
                 System.exit(0);
             }
@@ -61,21 +61,21 @@ public class Main {
                 if (lPort < 0) {
                     throw new IllegalArgumentException("Invalid port number!");
                 }
-                port = (int)lPort;
+                port = (int) lPort;
             }
             database = cmdLine.getOptionValue("db");
-            if(database == null || database.isEmpty()){
+            if (database == null || database.isEmpty()) {
                 throw new IllegalArgumentException("Database name must not be empty!");
             }
             collection = cmdLine.getOptionValue("c");
-            if(collection == null || collection.isEmpty()){
+            if (collection == null || collection.isEmpty()) {
                 throw new IllegalArgumentException("Collection name must not be empty!");
             }
             if (cmdLine.hasOption("m")) {
                 final String[] m_arg = cmdLine.getOptionValues("m");
                 for (int i = 0; i < m_arg.length; i++) {
                     final String mode = m_arg[i].toUpperCase();
-                    if(!(mode.equals(OperationModes.INSERT.name()) ||
+                    if (!(mode.equals(OperationModes.INSERT.name()) ||
                             mode.equals(OperationModes.UPDATE_ONE.name()) ||
                             mode.equals(OperationModes.UPDATE_MANY.name()) ||
                             mode.equals(OperationModes.COUNT_ONE.name()) ||
@@ -84,7 +84,7 @@ public class Main {
                             mode.equals(OperationModes.ITERATE_MANY.name()) ||
                             mode.equals(OperationModes.DELETE_ONE.name()) ||
                             mode.equals(OperationModes.DELETE_MANY.name())
-                    )){
+                    )) {
                         throw new IllegalArgumentException("Mode must be either " + OperationModes.INSERT.name() + ", "
                                 + OperationModes.UPDATE_ONE.name() + ", "
                                 + OperationModes.UPDATE_MANY.name() + ", "
@@ -98,7 +98,7 @@ public class Main {
                     }
                     modes.add(mode);
                 }
-            }else{
+            } else {
                 modes.add(OperationModes.INSERT.name());
             }
 
@@ -111,10 +111,10 @@ public class Main {
                     }
                     operationsCounts.add(operationsCount);
                 }
-                if(modes.size() != operationsCounts.size()){
-                    throw new IllegalArgumentException("Number of mode parameters (-m) must be equal to number of operations parameters (-o) but was "+modes.size()+" and "+operationsCounts.size()+".");
+                if (modes.size() != operationsCounts.size()) {
+                    throw new IllegalArgumentException("Number of mode parameters (-m) must be equal to number of operations parameters (-o) but was " + modes.size() + " and " + operationsCounts.size() + ".");
                 }
-            }else{
+            } else {
                 operationsCounts.add(0l);
             }
 
@@ -137,11 +137,11 @@ public class Main {
                     threadCounts.add(threadCount);
                 }
 
-            }else {
+            } else {
                 threadCounts.add(DEFAULT_THREADS);
             }
-            if(threadCounts.size() % modes.size() != 0){
-                throw new IllegalArgumentException("Number of thread parameters (-t) must be a multiple of number of modes parameters (-m) but was "+threadCounts.size()+" and "+modes.size()+".");
+            if (threadCounts.size() % modes.size() != 0) {
+                throw new IllegalArgumentException("Number of thread parameters (-t) must be a multiple of number of modes parameters (-m) but was " + threadCounts.size() + " and " + modes.size() + ".");
             }
 
 
@@ -151,8 +151,8 @@ public class Main {
             if (cmdLine.hasOption("ssl")) {
                 ssl = true;
             }
-            if(authDb==null || authDb.isEmpty()){
-                authDb=database;
+            if (authDb == null || authDb.isEmpty()) {
+                authDb = database;
             }
             if (cmdLine.hasOption("dropdb")) {
                 dropDb = true;
@@ -167,7 +167,6 @@ public class Main {
             }
 
 
-
         } catch (Exception e) {
             LOG.error(e.getMessage());
             exception = true;
@@ -175,19 +174,19 @@ public class Main {
         if (exception || helpRequested) {
             HelpFormatter hf = new HelpFormatter();
             hf.setOptionComparator(null);
-            hf.printHelp(160, Main.class.getName(), "*** mongoDB performance test (version "+version+")***\n" +
-                            "Please run first mode="+ OperationModes.INSERT.name()+" in order to have a non-empty collection to test on.\n" +
+            hf.printHelp(160, Main.class.getName(), "*** mongoDB performance test (version " + version + ")***\n" +
+                            "Please run first mode=" + OperationModes.INSERT.name() + " in order to have a non-empty collection to test on.\n" +
                             "You may add option 'dropdb' in order to drop the database before inserting documents.\n" +
                             "Documents are inserted one by one (no bulk insert).\n" +
                             "Once documents are inserted, run mode=" +
                             OperationModes.UPDATE_ONE.name() + ", mode=" +
                             OperationModes.UPDATE_MANY.name() + ", mode=" +
                             OperationModes.COUNT_ONE.name() + ", mode=" +
-                            OperationModes.COUNT_MANY.name()+", mode=" +
+                            OperationModes.COUNT_MANY.name() + ", mode=" +
                             OperationModes.ITERATE_ONE.name() + ", mode=" +
-                            OperationModes.ITERATE_MANY.name()+", mode=" +
+                            OperationModes.ITERATE_MANY.name() + ", mode=" +
                             OperationModes.DELETE_ONE.name() + " or mode=" +
-                            OperationModes.DELETE_MANY.name()+" or a whole set of modes simultaneously." +
+                            OperationModes.DELETE_MANY.name() + " or a whole set of modes simultaneously." +
                             "\n  Modes explained:" +
                             "\n  " + OperationModes.INSERT.name() + " inserts documents with the following fields:" +
                             "\n     " + IOperation.ID + ": incremented long number starting from max(_id)+1, reflecting the number of inserts being executed" +
@@ -197,9 +196,9 @@ public class Main {
                             "\n     " + IOperation.RANDOM_TEXT + ": a random text, size defined by user (default 0, thus absent)" +
                             "\n     " + IOperation.VERSION + ": version number of the document, starting from 1" +
                             "\n  " + OperationModes.UPDATE_ONE.name() + " updates one document randomly queried on field '" + IOperation.ID + "'" +
-                                 " by incrementing the field '"+IOperation.VERSION + "' and updating the field '"+IOperation.RANDOM_LONG+"' to a random value." +
+                            " by incrementing the field '" + IOperation.VERSION + "' and updating the field '" + IOperation.RANDOM_LONG + "' to a random value." +
                             "\n  " + OperationModes.UPDATE_MANY.name() + " updates all documents randomly queried on field '" + IOperation.THREAD_RUN_COUNT + "'" +
-                                 " by incrementing the field '"+IOperation.VERSION + "' and updating the field '"+IOperation.RANDOM_LONG+"' to a random value." +
+                            " by incrementing the field '" + IOperation.VERSION + "' and updating the field '" + IOperation.RANDOM_LONG + "' to a random value." +
                             "\n  " + OperationModes.COUNT_ONE.name() + " counts one document randomly queried on field '" + IOperation.ID + "'." +
                             "\n  " + OperationModes.COUNT_MANY.name() + " counts all documents randomly queried on field '" + IOperation.THREAD_RUN_COUNT + "'." +
                             "\n  " + OperationModes.ITERATE_ONE.name() + " finds one document randomly queried on field '" + IOperation.ID + "'." +
@@ -207,16 +206,15 @@ public class Main {
                             "\n  " + OperationModes.DELETE_ONE.name() + " deletes one document randomly queried on field '" + IOperation.ID + "'." +
                             "\n  " + OperationModes.DELETE_MANY.name() + " deletes all documents randomly queried on field '" + IOperation.THREAD_RUN_COUNT + "'." +
                             "\nThe queried field is indexed in the forground before the test is run, so on first run it may take time to build the index." +
-                            "\nAt the end of each run, 2 csv-files with performance statistics are generated:"  +
-                            "\n  1) File '"+OperationExecutor.TIMER_PER_SECOND_PREFIX +"[mode].csv' contains aggregated time series of 1 second per row for the defined [mode]." +
-                            "\n  2) File '"+OperationExecutor.TIMER_PER_RUN_PREFIX +"[mode].csv' contains 1 row of aggregated data over the whole runtime for the defined [mode]." +
+                            "\nAt the end of each run, 2 csv-files with performance statistics are generated:" +
+                            "\n  1) File '" + OperationExecutor.TIMER_PER_SECOND_PREFIX + "[mode].csv' contains aggregated time series of 1 second per row for the defined [mode]." +
+                            "\n  2) File '" + OperationExecutor.TIMER_PER_RUN_PREFIX + "[mode].csv' contains 1 row of aggregated data over the whole runtime for the defined [mode]." +
                             "\nOptions:", cliOptions,
                     "@author kay.agahd@idealo.de", true);
             System.exit(helpRequested ? 0 : 1);
         }
 
     }
-
 
 
     private static Options cliOptions() {
@@ -239,12 +237,12 @@ public class Main {
                                 + " Defined modes are executed simultaneously with their corresponding number of threads as soon as all modes of the current run are terminated.").build())
                 .addOption(Option.builder("o").longOpt("operationscount").hasArgs().argName("OPERATIONS_COUNT")
                         .desc("number of operations to be executed - Enter as many values as modes (-m) since each mode has its own operation count, separated by space, first value must be preceded by space too."
-                         + " May be left out in order to exclusively rely on parameter duration (-d).").type(Number.class).build())
+                                + " May be left out in order to exclusively rely on parameter duration (-d).").type(Number.class).build())
                 .addOption(Option.builder("t").longOpt("threads").hasArgs().argName("THREADS")
                         .desc("number of threads (1 or more, default " + DEFAULT_THREADS + ") - Separate multiple values by space, first value must be preceded by space too."
-                         + " 1st value defines number of threads of 1st mode (-m),"
-                         + " 2nd value defines number of threads of 2nd mode (-m) etc."
-                         + " If number of thread parameters (-t) is a multiple of mode parameters (-m), it restarts all modes simultaneously with their corresponding number of threads as soon as all modes of the current run are terminated.")
+                                + " 1st value defines number of threads of 1st mode (-m),"
+                                + " 2nd value defines number of threads of 2nd mode (-m) etc."
+                                + " If number of thread parameters (-t) is a multiple of mode parameters (-m), it restarts all modes simultaneously with their corresponding number of threads as soon as all modes of the current run are terminated.")
                         .type(Number.class).build())
                 .addOption(Option.builder("d").longOpt("duration").hasArg().argName("DURATION")
                         .desc("maximum duration in seconds of the performance test for each set of modes (default " + DEFAULT_MAX_DURATION_IN_SECONDS + ")")
@@ -272,12 +270,12 @@ public class Main {
         final ServerAddress serverAddress = new ServerAddress(host, port);
         final MongoDbAccessor mongoDbAccessor = new MongoDbAccessor(user, password, authDb, ssl, serverAddress);
 
-        int run=0;
+        int run = 0;
         CountDownLatch runModeLatch = new CountDownLatch(modes.size());
         final ExecutorService executor = Executors.newFixedThreadPool(modes.size());
         try {
-            for(int threadCount : threadCounts) {
-                if(run >= modes.size()){
+            for (int threadCount : threadCounts) {
+                if (run >= modes.size()) {
                     run = 0;
                     LOG.info("All run modes are running with their specified number of threads. Waiting on finishing of each run mode before continuing...");
                     runModeLatch.await();
@@ -285,8 +283,8 @@ public class Main {
                 }
 
                 final String mode = modes.get(run);
-                final long operationsCount = operationsCounts.size()>run?operationsCounts.get(run):operationsCounts.get(0);
-                IOperation operation = null;
+                final long operationsCount = operationsCounts.size() > run ? operationsCounts.get(run) : operationsCounts.get(0);
+                IOperation operation;
                 if (mode.equals(OperationModes.UPDATE_ONE.name())) {
                     operation = new UpdateOperation(mongoDbAccessor, database, collection, IOperation.ID);
                 } else if (mode.equals(OperationModes.UPDATE_MANY.name())) {
@@ -310,7 +308,7 @@ public class Main {
                         mongoDbAccessor.getMongoDatabase(database).drop();
                         LOG.info("database '{}' dropped", database);
                     }
-                    if(randomFieldLength > 0){
+                    if (randomFieldLength > 0) {
                         insertOperation.setRandomFieldLength(randomFieldLength);
                     }
                     operation = insertOperation;
@@ -325,14 +323,14 @@ public class Main {
 
         } catch (Exception e) {
             LOG.error("Error while waiting on thread.", e);
-        }finally {
+        } finally {
             executor.shutdown();
             mongoDbAccessor.closeConnections();
         }
 
     }
 
-    public static void main(String... args){
+    public static void main(String... args) {
         Main m = new Main();
         m.validateInput(args);
         m.executeOperations();
