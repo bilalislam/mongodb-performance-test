@@ -27,57 +27,102 @@ public class InsertOperation extends AbstractOperation {
 
     @Override
     long executeQuery(int threadId, long threadRunCount, long globalRunCount, long selectorId, long randomId) {
+
+        int min = 10000;
+        int max = 1000000;
+
         List<BasicDBObject> basketItems = new ArrayList<>();
+        List<BasicDBObject> pendingApprovalActions = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             BasicDBObject basketItem = new BasicDBObject("_id", UUID.randomUUID());
             basketItem.append("Created", LocalDateTime.now())
                     .append("Updated", LocalDateTime.now())
-                    .append("Quantity", 1)
+                    .append("InterestRate", 0.0)
                     .append("Price", new BasicDBObject()
                             .append("Amount", 10)
-                            .append("Tax", 5))
-                    .append("Product", new BasicDBObject("_id", UUID.randomUUID())
-                            .append("Created", LocalDateTime.now())
-                            .append("Updated", LocalDateTime.now())
-                            .append("Limitation", new BasicDBObject()
-                                    .append("InstallmentLimit", "12")
-                                    .append("MaximumPurchasableQuantity", "3"))
-                            .append("Merchant", new BasicDBObject()
-                                    .append("ImageFileName", "9056467419186.jpg")
-                                    .append("SecureLinkFormat", "https://productimages.hepsiburada.net/s/9/{size}/9056467419186.jpg"))
-                            .append("Metadata", new BasicDBObject()
-                                    .append("Sku", "OFISDOPLCAN6398"))
-                            .append("Pricing", new BasicDBObject()
-                                    .append("SellingPrice", new BasicDBObject()
-                                            .append("Amount", 70.2)
-                                            .append("Currency", "949")))
-                            .append("SellingPriceWithDiscount", null)
-                            .append("TaxVatRate", 8.0)
-                            .append("UnitPrice", new BasicDBObject()
-                                    .append("Amount", 65)
-                                    .append("Currency", "949"))
-                            .append("Stock", new BasicDBObject()
-                                    .append("AvailableStockQuantity", 100)
-                                    .append("Freight", 3.0)
-                                    .append("WarehouseId", null))
-                            .append("Marketplace", new BasicDBObject()
-                                    .append("ListingId", UUID.randomUUID()))
-                    );
+                            .append("Currency", "949"))
+                    .append("Tax", new BasicDBObject()
+                            .append("Amount", 10)
+                            .append("Currency", "949"));
 
             basketItems.add(basketItem);
         }
-        DBObject basket = new BasicDBObject("_id", UUID.randomUUID())
+
+        BasicDBObject pendingApprovalAction_1 = new BasicDBObject();
+        pendingApprovalAction_1.append("Key", "ThreeDRequired")
+                .append("Value", true)
+                .append("Reasons", "ChoiceOfCustomer");
+
+        BasicDBObject pendingApprovalAction_2 = new BasicDBObject();
+        pendingApprovalAction_2.append("Key", "OtpRequired")
+                .append("Value", "OrderSummary")
+                .append("Reasons", "OtpRequired");
+
+        pendingApprovalActions.add(pendingApprovalAction_1);
+        pendingApprovalActions.add(pendingApprovalAction_2);
+
+        DBObject payment = new BasicDBObject("_id", UUID.randomUUID())
                 .append("Created", LocalDateTime.now())
                 .append("Updated", LocalDateTime.now())
                 .append("Version", 0)
-                .append("Merchant", new BasicDBObject("_id", UUID.randomUUID())
-                        .append("Created", LocalDateTime.now())
-                        .append("Updated", LocalDateTime.now()))
                 .append("Customer", new BasicDBObject("_id", UUID.randomUUID())
                         .append("Created", LocalDateTime.now())
                         .append("Updated", LocalDateTime.now())
                         .append("EmailAddress", "bilal.islam@hepsiburada.com"))
-                .append("BasketItems", basketItems)
+                .append("Basket", new BasicDBObject()
+                        .append("BasketItems", basketItems)
+                        .append("TotalPrice", new BasicDBObject()
+                                .append("Amount", 20)
+                                .append("Currency", "949"))
+                        .append("TotalTax", new BasicDBObject()
+                                .append("Amount", 10)
+                                .append("Currency", "949")))
+                .append("Delivery", new BasicDBObject("_id", UUID.randomUUID())
+                        .append("Created", LocalDateTime.now())
+                        .append("Updated", LocalDateTime.now())
+                        .append("ShippingPrice", new BasicDBObject()
+                                .append("Amount", 20)
+                                .append("Currency", "949"))
+                        .append("ShippingPriceTax", new BasicDBObject()
+                                .append("Amount", 10)
+                                .append("Currency", "949")))
+                .append("Options", new BasicDBObject()
+                        .append("CreditCard", new BasicDBObject()
+                                .append("PaidAmount", new BasicDBObject()
+                                        .append("Amount", 10)
+                                        .append("Currency", 949))
+                                .append("TemporaryId", UUID.randomUUID())
+                                .append("MaskedNumber", "424242******4242")
+                                .append("HolderName", "Bilal İslam")
+                                .append("Installment", new BasicDBObject().
+                                        append("Count", 1))
+                                .append("Information", new BasicDBObject()
+                                        .append("BankName", "Garanti")
+                                        .append("Family", "Bonus")
+                                        .append("IsCorporate", false)
+                                        .append("IsDebit", false)
+                                        .append("Is3DMust", false)
+                                        .append("IsVft", false)
+                                        .append("VPosName", "GarantiVpos")
+                                        .append("IssuerBankId", null)
+                                        .append("StoredCreditCard", null)
+                                        .append("Vft", null))
+                                .append("InterestRate", new BasicDBObject()
+                                        .append("Price", new BasicDBObject()
+                                                .append("Amount", 20)
+                                                .append("Currency", "949"))
+                                        .append("Tax", new BasicDBObject()
+                                                .append("Amount", 10)
+                                                .append("Currency", "949")))
+                                .append("KeepForFutureUse", false)
+                        )
+                        .append("Transaction", null)
+                        .append("PendingApprovalActions", pendingApprovalActions)
+                )
+                .append("Order", new BasicDBObject()
+                        .append("OrderNumber", (int) (Math.random() * (max - min + 1) + min))
+                        .append("Application", "umut.cakil@hepsiburada.com")
+                        .append("SnapshotId", UUID.randomUUID()))
                 .append("TotalPrice", new BasicDBObject()
                         .append("Amount", 20)
                         .append("Currency", "949"))
@@ -85,12 +130,12 @@ public class InsertOperation extends AbstractOperation {
                         .append("Amount", 10)
                         .append("Currency", "949"))
                 .append("State", new BasicDBObject()
-                        .append("Value", "Created"))
+                        .append("Value", "PaymentUpdated"))
                 .append("Status", new BasicDBObject()
                         .append("Value", "Active"));
 
 
-        mongoCollection.insertOne(new Document(basket.toMap()));
+        mongoCollection.insertOne(new Document(payment.toMap()));
         return 1l;
     }
 

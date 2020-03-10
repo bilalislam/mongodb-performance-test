@@ -21,8 +21,9 @@ public class IterateOperation extends AbstractOperation {
 
     @Override
     long executeQuery(int threadId, long threadRunCount, long globalRunCount, long selectorId, long randomId) {
-        BasicDBObject searchQuery = new BasicDBObject("Customer._id", UUID.fromString("27becf70-8ae7-4d04-8d02-f6a6ed5a76f3"));
-        searchQuery.append("Status", new BasicDBObject("Value", "Active"));
+        BasicDBObject searchQuery = new BasicDBObject("Customer._id", UUID.fromString("58d5df9f-d335-4c8f-911c-b0fbbf5e9e40"));
+        searchQuery.append("Order", new BasicDBObject()
+                .append("OrderNumber", 84772));
 
         //more effective
         //final MongoCursor<Document> cursor = mongoCollection.find(searchQuery).sort(new BasicDBObject("Created", -1)).iterator();
