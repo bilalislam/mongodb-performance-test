@@ -22,6 +22,8 @@ public class UpdateOperation extends AbstractOperation {
         super(mongoDbAccessor, db, collection, field);
     }
 
+
+    // partial_one
 //    @Override
 //    long executeQuery(int threadId, long threadRunCount, long globalRunCount, long selectorId, long randomId) {
 //        BasicDBObject searchQuery = new BasicDBObject("Customer._id", UUID.fromString("27becf70-8ae7-4d04-8d02-f6a6ed5a76f3"));
@@ -33,6 +35,7 @@ public class UpdateOperation extends AbstractOperation {
 //        return mongoCollection.updateOne(searchQuery, updateQuery).getModifiedCount();
 //    }
 
+    //replace_one
     @Override
     long executeQuery(int threadId, long threadRunCount, long globalRunCount, long selectorId, long randomId) {
         BasicDBObject filter = new BasicDBObject("Customer._id", UUID.fromString("e4d91853-f747-4c73-b855-9088500921b1"));
